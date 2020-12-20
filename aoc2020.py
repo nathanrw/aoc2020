@@ -32,7 +32,7 @@ def task_1_part_2():
     print(number)
 
 
-def task_2_part_1():
+def task_2_read_records():
     with open('input2.txt') as f:
         lines = f.readlines()
     class Record(object):
@@ -40,36 +40,25 @@ def task_2_part_1():
             pattern = "(\\d+)-(\\d+) (\\w): (\\w+)"
             match = re.search(pattern, line)
             assert match
-            self.rule_min_count = int(match.group(1))
-            self.rule_max_count = int(match.group(2))
-            self.rule_character = match.group(3)
+            self.a = int(match.group(1))
+            self.b = int(match.group(2))
+            self.c = match.group(3)
             self.password = match.group(4)
-        def is_valid(self):
-            count = self.password.count(self.rule_character)
-            return self.rule_min_count <= count and count <= self.rule_max_count
-    records = [ Record(line) for line in lines ]
-    count = len([record for record in records if record.is_valid()])
+    return [ Record(line) for line in lines ]
+
+
+def task_2_part_1():
+    def validate(r):
+        count = r.password.count(r.c)
+        return r.a <= count and count <= r.b
+    count = len([r for r in task_2_read_records() if validate(r)])
     print(count)
 
 
 def task_2_part_2():
-    with open('input2.txt') as f:
-        lines = f.readlines()
-    class Record(object):
-        def __init__(self, line):
-            pattern = "(\\d+)-(\\d+) (\\w): (\\w+)"
-            match = re.search(pattern, line)
-            assert match
-            self.rule_index_1 = int(match.group(1))-1
-            self.rule_index_2 = int(match.group(2))-1
-            self.rule_character = match.group(3)
-            self.password = match.group(4)
-        def is_valid(self):
-            index_1_matches = self.password[self.rule_index_1] == self.rule_character
-            index_2_matches = self.password[self.rule_index_2] == self.rule_character
-            return index_1_matches != index_2_matches
-    records = [ Record(line) for line in lines ]
-    count = len([record for record in records if record.is_valid()])
+    def validate(r):
+        return (r.password[r.a-1] == r.c) != (r.password[r.b-1] == r.c)
+    count = len([r for r in task_2_read_records() if validate(r)])
     print(count)
 
 
