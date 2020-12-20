@@ -137,13 +137,116 @@ def task_3_part_2():
     print("Result:", result)
 
 
+def task_4_read_passports(filename):
+    with open(filename) as f:
+        lines = f.readlines()
+    passports = [{}]
+    for line in lines:
+        fields = line.strip().split()
+        if len(fields) == 0:
+            passports.append({})
+            continue
+        for field in fields:
+            tokens = field.split(":")
+            assert len(tokens) == 2
+            assert not tokens[0] in passports[-1]
+            passports[-1][tokens[0]] = tokens[1]
+    return [p for p in passports if len(p) > 0]
+
+
+def task_4_validate_height(value_str):
+    value = int(value_str[:-2])
+    units = value_str[-2:]
+    if units == "cm":
+        return 150 <= value and value <= 193
+    elif units == "in":
+        return 59 <= value and value <= 76
+    else:
+        return False
+
+
+def task_4_validate_passport(passport, apply_rules=True):
+    print()
+    ok = True
+    optional = ['cid']
+    rules = {
+        'byr': ["\\d{4}", lambda x: 1920 <= int(x) and int(x) <= 2002 ],
+        'iyr': ["\\d{4}", lambda x: 2010 <= int(x) and int(x) <= 2020 ],
+        'eyr': ["\\d{4}", lambda x: 2020 <= int(x) and int(x) <= 2030 ],
+        'hgt': ["\\d+(cm|in)", task_4_validate_height],
+        'hcl': ["#[0-9a-f]{6}", None],
+        'ecl': ["amb|blu|brn|gry|grn|hzl|oth", None],
+        'pid': ["\\d{9}", None],
+        'cid': [None, None]
+    }
+    for key in rules:
+
+        # Ensure key is in passport unless optional
+        if not key in passport:
+            if key in optional:
+                continue
+            else:
+                print(key, "missing")
+                ok = False
+                continue
+
+        # Apply validation rules unless doing quick check
+        if not apply_rules:
+            continue
+        value = passport[key]
+        pattern = rules[key][0]
+        predicate = rules[key][1]
+        matched = True
+        if pattern is not None:
+            match = re.match(pattern, value)
+            if not match:
+                print("R", key, ":", pattern, "!=~", value)
+                ok = False
+                matched = False
+            else:
+                print("R", key, ":", pattern, "=~", value)
+        if matched and predicate is not None:
+            if not predicate(value):
+                print("P", key, ":", value, "predicate failed")
+                ok = False
+            else:
+                print("P", key, ":", value, "OK")
+
+    # Check for unwanted fields
+    for key in passport:
+        if not key in rules:
+            print(key, "unwanted")
+            ok = False
+
+    print(ok)
+    return ok
+
+
+
+def task_4_part_1():
+    passports = task_4_read_passports("input4.txt")
+    num_valid = len([p for p in passports if task_4_validate_passport(p, False)])
+    assert num_valid == 204
+    print(num_valid)
+
+
+def task_4_part_2():
+    passports = task_4_read_passports("input4.txt")
+    num_valid = len([p for p in passports if task_4_validate_passport(p)])
+    num_invalid = len([p for p in passports if not task_4_validate_passport(p)])
+    print(num_valid)
+    print(num_invalid)
+
+
 def main():
     #task_1_part_1()
     #task_1_part_2()
     #task_2_part_1()
     #task_2_part_2()
-    task_3_part_1()
-    task_3_part_2()
+    #task_3_part_1()
+    #task_3_part_2()
+    #task_4_part_1()
+    task_4_part_2()
 
 
 if __name__ == '__main__':
