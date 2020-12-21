@@ -320,7 +320,69 @@ def task_6_part_2():
     groups = task_6_read_groups()
     count = sum([len([k for k in g.answers if g.answers[k] == g.count]) for g in groups])
     print(count)
+    assert count == 3354
 
+
+def task_7_read_rules():
+    with open('input7.txt') as f:
+        lines = f.readlines()
+    def parse_rule(line):
+        class Rule(object):
+            def __init__(self, colour, contents):
+                self.colour = colour
+                self.contents = contents
+        comma_split = line.split(",")
+        contain_split = comma_split[0].split("contain")
+        container_str = contain_split[0]
+        contents_strs = [contain_split[1]] + comma_split[1:]
+        container_tokens = container_str.split()
+        container_colour = " ".join(container_tokens[:2])
+        contents = {}
+        for contents_str in contents_strs:
+            contents_tokens = contents_str.split()
+            if contents_tokens[0] == "no":
+                continue
+            contents_count = int(contents_tokens[0])
+            contents_colour = " ".join(contents_tokens[1:3])
+            contents[contents_colour] = contents_count
+        return Rule(container_colour, contents)
+    return [ parse_rule(line) for line in lines ]
+
+
+def task_7_find_possible_containers(rules, colour, seen=set()):
+    direct_parents = [ r.colour for r in rules if colour in r.contents ]
+    for c in direct_parents:
+        if c in seen: continue
+        print(c)
+        seen.add(c)
+        task_7_find_possible_containers(rules, c, seen)
+    return seen
+
+
+def task_7_count_contents(rules, colour):
+    rules_for_colour = [ r for r in rules if r.colour == colour ]
+    assert len(rules_for_colour) == 1
+    rule = rules_for_colour[0]
+    count = 0
+    for content_colour in rule.contents:
+        n = rule.contents[content_colour]
+        count += n * (1 + task_7_count_contents(rules, content_colour))
+    return count
+
+
+def task_7_part_1():
+    rules = task_7_read_rules()
+    containers = task_7_find_possible_containers(rules, "shiny gold")
+    answer = len(containers)
+    assert answer == 246
+    print(answer)
+
+
+def task_7_part_2():
+    rules = task_7_read_rules()
+    answer = task_7_count_contents(rules, "shiny gold")
+    print(answer)
+    assert answer == 2976
 
 def main():
     #task_1_part_1()
@@ -333,8 +395,10 @@ def main():
     #task_4_part_2()
     #task_5_part_1()
     #task_5_part_2()
-    task_6_part_1()
-    task_6_part_2()
+    #task_6_part_1()
+    #task_6_part_2()
+    task_7_part_1()
+    task_7_part_2()
 
 
 if __name__ == '__main__':
