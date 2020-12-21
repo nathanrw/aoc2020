@@ -238,6 +238,90 @@ def task_4_part_2():
     print(num_invalid)
 
 
+def task_5_decode_seat_id(code):
+    assert len(code) == 10
+    row_code = code[:7]
+    column_code = code[7:]
+    assert len(row_code) == 7
+    def decode_bsp(code, l, r, min, max):
+        assert len(l) == 1
+        assert len(r) == 1
+        assert code.count(l) + code.count(r) == len(code)
+        if len(code) == 0:
+            assert min == max
+            return min
+        assert min != max
+        c = code[0]
+        rest = code[1:]
+        if c == l:
+            return decode_bsp(rest, l, r, min, (min+max)//2)
+        elif c == r:
+            return decode_bsp(rest, l, r, (min+max)//2+1, max)
+        else:
+            assert False
+    column = decode_bsp(column_code, 'L', 'R', 0, 7)
+    row = decode_bsp(row_code, 'F', 'B', 0, 127)
+    seat_id = row * 8 + column
+    return seat_id
+
+
+def task_5_read_seat_ids():
+    with open('input5.txt') as f:
+        lines = f.readlines()
+    return [ task_5_decode_seat_id(line.strip()) for line in lines ]
+
+
+def task_5_part_1():
+    ids = task_5_read_seat_ids()
+    highest = sorted(ids)[-1]
+    assert highest == 953
+    print(highest)
+
+
+def task_5_part_2():
+    my_seat = None
+    ids = sorted(task_5_read_seat_ids())
+    for i in range(len(ids)-1):
+        if ids[i] != ids[i+1]-1:
+            my_seat = ids[i]+1
+            break
+    print(my_seat)
+    assert my_seat == 615
+
+
+def task_6_read_groups():
+    with open('input6.txt') as f:
+        lines = f.readlines()
+    class Group(object):
+        def __init__(self):
+            self.answers = {}
+            self.count = 0
+    groups = [Group()]
+    for line in lines:
+        chars = line.strip()
+        if len(chars) == 0:
+            groups.append(Group())
+            continue
+        groups[-1].count += 1
+        for char in chars:
+            count = groups[-1].answers.get(char, 0)
+            groups[-1].answers[char] = count+1
+    return [ g for g in groups if g.count > 0 ]
+
+
+def task_6_part_1():
+    groups = task_6_read_groups()
+    count = sum([ len(g.answers) for g in groups ])
+    assert count == 6799
+    print(count)
+
+
+def task_6_part_2():
+    groups = task_6_read_groups()
+    count = sum([len([k for k in g.answers if g.answers[k] == g.count]) for g in groups])
+    print(count)
+
+
 def main():
     #task_1_part_1()
     #task_1_part_2()
@@ -246,7 +330,11 @@ def main():
     #task_3_part_1()
     #task_3_part_2()
     #task_4_part_1()
-    task_4_part_2()
+    #task_4_part_2()
+    #task_5_part_1()
+    #task_5_part_2()
+    task_6_part_1()
+    task_6_part_2()
 
 
 if __name__ == '__main__':
