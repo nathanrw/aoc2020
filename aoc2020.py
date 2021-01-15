@@ -384,6 +384,57 @@ def task_7_part_2():
     print(answer)
     assert answer == 2976
 
+
+def task_8_read_program():
+    class Instruction(object):
+        def __init__(self, line):
+            tokens = line.split()
+            assert len(tokens) == 2
+            self.op = tokens[0]
+            self.arg = int(tokens[1])
+    with open('input8.txt') as f:
+        lines = f.readlines()
+    program = [ Instruction(line) for line in lines ]
+    return program
+
+
+def task_8_execute_program(program):
+    ip = 0
+    acc = 0
+    executed = set()
+    while ip < len(program):
+        if ip in executed:
+            print("begin loop")
+            break
+        executed.add(ip)
+        i = program[ip]
+        if i.op == 'nop':
+            pass
+        elif i.op == 'acc':
+            acc += i.arg
+        elif i.op == 'jmp':
+            print("jump from", ip)
+            ip += i.arg
+            continue
+        ip += 1
+    print("ip:", ip)
+    return acc
+
+
+def task_8_part_1():
+    program = task_8_read_program()
+    result = task_8_execute_program(program)
+    print(result)
+    assert result == 1801
+
+
+def task_8_part_2():
+    program = task_8_read_program()
+    program[210].op = "nop"
+    result = task_8_execute_program(program)
+    print(result)
+
+
 def main():
     #task_1_part_1()
     #task_1_part_2()
@@ -397,8 +448,9 @@ def main():
     #task_5_part_2()
     #task_6_part_1()
     #task_6_part_2()
-    task_7_part_1()
-    task_7_part_2()
+    #task_7_part_1()
+    #task_7_part_2()
+    task_8_part_1()
 
 
 if __name__ == '__main__':
